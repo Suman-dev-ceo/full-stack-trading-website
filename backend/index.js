@@ -10,11 +10,17 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const authRoute = require("./Routes/AuthRoute");
 const cookieParser = require("cookie-parser");
+const allowedOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .filter(Boolean);
+// e.g. "https://auth-xxx.netlify.app,https://dash-yyy.netlify.app"
 
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: allowedOrigins.length
+      ? allowedOrigins
+      : [/localhost:3000$/, /localhost:3001$/],
     credentials: true,
   })
 );
@@ -243,5 +249,5 @@ app.get("/orders", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log("App is listening to port: 8080");
+  console.log(`App is listening to port: ${PORT}`);
 });

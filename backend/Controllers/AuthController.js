@@ -1,6 +1,17 @@
 const User = require("../models/UserModel");
 const { createSecretToken } = require("../util/SecretToken");
 const bcrypt = require("bcrypt");
+const isProd = process.env.NODE_ENV === "production";
+
+function cookieOpts() {
+  return {
+    httpOnly: true,
+    secure: isProd, // secure only in prod (required for SameSite=None)
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  };
+}
 
 module.exports.Signup = async (req, res) => {
   try {
@@ -22,13 +33,7 @@ module.exports.Signup = async (req, res) => {
 
     const token = createSecretToken(user._id);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false, // true on HTTPS in prod
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("token", token, cookieOpts());
 
     return res.status(201).json({
       success: true,
@@ -63,14 +68,7 @@ module.exports.Login = async (req, res) => {
 
     const token = createSecretToken(user._id);
 
-    // IMPORTANT: match the same cookie settings you use in Signup
-    res.cookie("token", token, {
-      httpOnly: true, // use true for security (same as we recommended for signup)
-      sameSite: "lax",
-      secure: false, // set true when you switch to HTTPS in prod
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    res.cookie("token", token, cookieOpts());
 
     return res.json({
       success: true,
