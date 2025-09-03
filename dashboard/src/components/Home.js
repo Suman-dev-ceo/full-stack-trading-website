@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Dashboard from "./Dashboard";
 import TopBar from "./TopBar";
+import RequireAuth from "./RequireAuth";
 
 const Home = () => {
   const [loading, setLoading] = useState(true);
@@ -30,8 +31,10 @@ const Home = () => {
     return <div style={{ padding: "20px" }}>Checking session...</div>;
   return (
     <>
-      <TopBar user={user} />
-      <Dashboard user={user} />
+      <RequireAuth>
+        <TopBar user={user} />
+        <Dashboard user={user} />
+      </RequireAuth>
     </>
   );
 };

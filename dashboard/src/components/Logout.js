@@ -1,18 +1,12 @@
-import React from "react";
-import axios from "axios";
+import axios from "../api";
 
-function Logout() {
+export default function Logout() {
   const handleClick = async () => {
     try {
-      await axios.post("http://localhost:8080/auth/logout", null, {
-        withCredentials: true,
-      });
-    } catch (e) {
-      console.error("Logout error", e);
-    } finally {
-      // send user back to Auth app login
-      window.location.assign("http://localhost:3000/login");
-    }
+      await axios.post("/auth/logout"); // backend should clear cookie
+    } catch {}
+    const authURL = process.env.REACT_APP_AUTH_URL || "http://localhost:3000";
+    window.location.assign(authURL);
   };
 
   return (
@@ -21,5 +15,3 @@ function Logout() {
     </button>
   );
 }
-
-export default Logout;
