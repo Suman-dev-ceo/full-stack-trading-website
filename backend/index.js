@@ -197,7 +197,7 @@ mongoose.connect(uri);
 //   res.send("Done Suman");
 // });
 
-app.use("/", authRoute);
+app.use("/auth", authRoute); // mount under /auth
 
 app.get("/allholdings", async (req, res) => {
   let allholdings = await Holding.find({});
