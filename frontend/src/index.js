@@ -12,7 +12,8 @@ import SupportPage from "./landingPage/support/SupportPage";
 import Navbar from "./landingPage/Navbar";
 import Footer from "./landingPage/Footer";
 import NotFound from "./landingPage/NotFound";
-import { Login, Signup } from "./pages";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
