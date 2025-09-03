@@ -1,0 +1,65 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.nav-link {
+  margin-left: 30px;
+}
+
+.anchor a {
+  display: inline-block;
+  text-decoration: none;
+  color: grey;
+  margin-bottom: 1rem;
+}
+
+.anc a {
+  text-decoration: none;
+  color: gray;
+  font-size: 1rem;
+}
+
+/* Support Page */
+#supportHero {
+  background-color: rgb(56, 126, 209);
+  color: white;
+}
+
+#supportWrapper {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 150px;
+  padding: 2rem 3rem;
+}
+
+#supportHero a {
+  color: white;
+}
+
+#supportHero input {
+  width: 100%;
+  padding: 0.75rem 0.5rem;
+  border-radius: 10px;
+  border: none;
+}
+
+#supportHero .row {
+  width: 100%;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  align-self: flex-end;
+}
+
+/* Authentication and Authorization */
