@@ -10,20 +10,20 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const authRoute = require("./Routes/AuthRoute");
 const cookieParser = require("cookie-parser");
+const allowed = [
+  "https://sparkling-rolypoly-0089c9.netlify.app", // Auth site
+  "https://full-stack-trading-dashboard.netlify.app", // Dashboard site
+  "http://localhost:3000",
+  "http://localhost:3001",
+];
 const allowedOrigins = (process.env.CORS_ORIGINS || "")
   .split(",")
   .filter(Boolean);
 // e.g. "https://auth-xxx.netlify.app,https://dash-yyy.netlify.app"
 
 const app = express();
-app.use(
-  cors({
-    origin: allowedOrigins.length
-      ? allowedOrigins
-      : [/localhost:3000$/, /localhost:3001$/],
-    credentials: true,
-  })
-);
+app.use(cors({ origin: allowed, credentials: true }));
+app.set("trust proxy", 1); // important on Render
 app.use(cookieParser());
 app.use(bodyParser.json());
 mongoose.connect(uri);
