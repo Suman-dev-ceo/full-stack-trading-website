@@ -13,8 +13,8 @@ const authRoute = require("./Routes/AuthRoute");
 const PORT = process.env.PORT || 8080;
 const uri = process.env.MONGO_URL;
 
-// --- CORS allowlist ---
-const fallbackAllowed = [
+// ---- CORS allowlist ----
+const defaultAllowed = [
   "https://sparkling-rolypoly-0089c9.netlify.app", // Auth app
   "https://full-stack-trading-dashboard.netlify.app", // Dashboard app
   "http://localhost:3000",
@@ -26,37 +26,46 @@ const allowedFromEnv = (process.env.CORS_ORIGINS || "")
   .map((s) => s.trim())
   .filter(Boolean);
 
-const allowedOrigins = allowedFromEnv.length ? allowedFromEnv : fallbackAllowed;
+const allowedOrigins = allowedFromEnv.length ? allowedFromEnv : defaultAllowed;
 
 const corsMiddleware = cors({
   origin: (origin, cb) => {
-    // allow server-to-server / curl (no Origin) and allowed list
+    // Allow server-to-server (no Origin header) and any allowed origin
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
     return cb(new Error(`CORS blocked: ${origin}`), false);
   },
   credentials: true,
 });
 
-// --- App setup ---
+// ---- App setup ----
 const app = express();
-app.set("trust proxy", 1); // required on Render for secure cookies
+app.set("trust proxy", 1); // needed on Render for correct secure cookie behavior
 app.use(corsMiddleware);
 app.options("*", corsMiddleware); // handle preflight
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-// --- DB ---
-mongoose.connect(uri);
+// ---- DB ----
+mongoose
+  .connect(uri, { serverSelectionTimeoutMS: 8000 })
+  .then(() => console.log("✅ Mongo connected"))
+  .catch((err) => {
+    console.error("❌ Mongo connection error:", err.message);
+    process.exit(1);
+  });
 
-// --- Routes ---
+// ---- Routes ----
 app.use("/auth", authRoute); // /auth/signup, /auth/login, /auth/verify, /auth/logout
 
-app.get("/allholdings", async (req, res) => {
+// health
+app.get("/", (_req, res) => res.send("API OK"));
+
+app.get("/allholdings", async (_req, res) => {
   const all = await Holding.find({});
   res.json(all);
 });
 
-app.get("/allpositions", async (req, res) => {
+app.get("/allpositions", async (_req, res) => {
   const all = await Position.find({});
   res.json(all);
 });
@@ -91,21 +100,20 @@ app.post("/newSell", async (req, res) => {
       mode: req.body.mode,
     });
     await newSell.save();
-    return res.json({ message: "Sell placed" });
+    return res.json({ success: true });
   }
-  res.status(400).json({ message: "You don't have enough shares to sell" });
+  return res
+    .status(400)
+    .json({ success: false, message: "You don't have enough shares to sell" });
 });
 
-app.get("/orders", async (req, res) => {
+app.get("/orders", async (_req, res) => {
   const all = await Order.find({});
   res.json(all);
 });
 
-// health check
-app.get("/", (_req, res) => res.send("API OK"));
-
 app.listen(PORT, () => {
-  console.log(`App is listening on port: ${PORT}`);
+  console.log(`App is listening on port ${PORT}`);
 });
 
 // app.get("/addHoldings", async (req, res) => {

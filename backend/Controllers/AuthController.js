@@ -25,7 +25,6 @@ module.exports.Signup = async (req, res) => {
         .json({ success: false, message: "User already exists" });
     }
 
-    // If your User schema has a pre('save') that hashes, just pass the raw password:
     const user = await User.create({ email, password, username, createdAt });
 
     const token = createSecretToken(user._id);
