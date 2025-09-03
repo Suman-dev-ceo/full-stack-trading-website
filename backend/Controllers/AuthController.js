@@ -1,15 +1,18 @@
 const User = require("../models/UserModel");
 const { createSecretToken } = require("../util/SecretToken");
 const bcrypt = require("bcrypt");
+
 const isProd = process.env.NODE_ENV === "production";
 
-res.cookie("token", token, {
-  httpOnly: true,
-  sameSite: isProd ? "None" : "Lax",
-  secure: isProd, // must be true on HTTPS (Render)
-  path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+function setAuthCookie(res, token) {
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: isProd ? "None" : "Lax",
+    secure: isProd, // must be true on Render/HTTPS
+    path: "/",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+}
 
 module.exports.Signup = async (req, res) => {
   try {
@@ -22,24 +25,19 @@ module.exports.Signup = async (req, res) => {
         .json({ success: false, message: "User already exists" });
     }
 
-    const user = await User.create({
-      email,
-      password,
-      username,
-      createdAt,
-    });
+    // If your User schema has a pre('save') that hashes, just pass the raw password:
+    const user = await User.create({ email, password, username, createdAt });
 
     const token = createSecretToken(user._id);
-
-    res.cookie("token", token, cookieOpts);
+    setAuthCookie(res, token);
 
     return res.status(201).json({
       success: true,
       message: "Signup successful",
       user: { id: user._id, email: user.email, username: user.username },
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -65,8 +63,7 @@ module.exports.Login = async (req, res) => {
     }
 
     const token = createSecretToken(user._id);
-
-    res.cookie("token", token, cookieOpts);
+    setAuthCookie(res, token);
 
     return res.json({
       success: true,
