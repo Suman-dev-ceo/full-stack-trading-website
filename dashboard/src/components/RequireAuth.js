@@ -7,20 +7,22 @@ export default function RequireAuth({ children }) {
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await axios.get("/auth/verify"); // must exist on backend
+        // Must match your backend route + method
+        const { data } = await axios.get("/auth/verify");
         if (data?.status) setOk(true);
-        else
-          window.location.assign(
-            process.env.REACT_APP_AUTH_URL || "http://localhost:3000"
-          );
+        else redirectToLogin();
       } catch {
-        window.location.assign(
-          process.env.REACT_APP_AUTH_URL || "http://localhost:3000"
-        );
+        redirectToLogin();
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (ok === null) return null; // or a loading spinner
+  const redirectToLogin = () => {
+    const authURL = process.env.REACT_APP_AUTH_URL || "http://localhost:3000";
+    window.location.assign(`${authURL}/login`);
+  };
+
+  if (ok === null) return null; // or a spinner
   return children;
 }
