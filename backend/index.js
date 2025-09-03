@@ -1,32 +1,112 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const PORT = process.env.PORT || 8080;
-const uri = process.env.MONGO_URL;
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+
 const { Holding } = require("./models/HoldingsModel");
 const { Position } = require("./models/PositionsModel");
 const { Order } = require("./models/OrdersModel");
-const cors = require("cors");
-const bodyParser = require("body-parser");
 const authRoute = require("./Routes/AuthRoute");
-const cookieParser = require("cookie-parser");
-const allowed = [
-  "https://sparkling-rolypoly-0089c9.netlify.app", // Auth site
-  "https://full-stack-trading-dashboard.netlify.app", // Dashboard site
+
+const PORT = process.env.PORT || 8080;
+const uri = process.env.MONGO_URL;
+
+// --- CORS allowlist ---
+const fallbackAllowed = [
+  "https://sparkling-rolypoly-0089c9.netlify.app", // Auth app
+  "https://full-stack-trading-dashboard.netlify.app", // Dashboard app
   "http://localhost:3000",
   "http://localhost:3001",
 ];
-const allowedOrigins = (process.env.CORS_ORIGINS || "")
-  .split(",")
-  .filter(Boolean);
-// e.g. "https://auth-xxx.netlify.app,https://dash-yyy.netlify.app"
 
+const allowedFromEnv = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const allowedOrigins = allowedFromEnv.length ? allowedFromEnv : fallbackAllowed;
+
+const corsMiddleware = cors({
+  origin: (origin, cb) => {
+    // allow server-to-server / curl (no Origin) and allowed list
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error(`CORS blocked: ${origin}`), false);
+  },
+  credentials: true,
+});
+
+// --- App setup ---
 const app = express();
-app.use(cors({ origin: allowed, credentials: true }));
-app.set("trust proxy", 1); // important on Render
+app.set("trust proxy", 1); // required on Render for secure cookies
+app.use(corsMiddleware);
+app.options("*", corsMiddleware); // handle preflight
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+// --- DB ---
 mongoose.connect(uri);
+
+// --- Routes ---
+app.use("/auth", authRoute); // /auth/signup, /auth/login, /auth/verify, /auth/logout
+
+app.get("/allholdings", async (req, res) => {
+  const all = await Holding.find({});
+  res.json(all);
+});
+
+app.get("/allpositions", async (req, res) => {
+  const all = await Position.find({});
+  res.json(all);
+});
+
+app.post("/newOrder", async (req, res) => {
+  const newOrder = new Order({
+    name: req.body.name,
+    qty: req.body.qty,
+    price: req.body.price,
+    mode: req.body.mode,
+  });
+  await newOrder.save();
+
+  const newHolding = new Holding({
+    name: req.body.name,
+    qty: req.body.qty,
+    price: req.body.price,
+    avg: req.body.price,
+  });
+  await newHolding.save();
+
+  res.send("Order sent");
+});
+
+app.post("/newSell", async (req, res) => {
+  const holding = await Holding.findOne({ name: req.body.name });
+  if (holding && req.body.qty <= holding.qty) {
+    const newSell = new Order({
+      name: req.body.name,
+      qty: req.body.qty,
+      price: req.body.price,
+      mode: req.body.mode,
+    });
+    await newSell.save();
+    return res.json({ message: "Sell placed" });
+  }
+  res.status(400).json({ message: "You don't have enough shares to sell" });
+});
+
+app.get("/orders", async (req, res) => {
+  const all = await Order.find({});
+  res.json(all);
+});
+
+// health check
+app.get("/", (_req, res) => res.send("API OK"));
+
+app.listen(PORT, () => {
+  console.log(`App is listening on port: ${PORT}`);
+});
 
 // app.get("/addHoldings", async (req, res) => {
 //   let tempHoldings = [
@@ -196,58 +276,3 @@ mongoose.connect(uri);
 
 //   res.send("Done Suman");
 // });
-
-app.use("/auth", authRoute); // mount under /auth
-
-app.get("/allholdings", async (req, res) => {
-  let allholdings = await Holding.find({});
-  res.json(allholdings);
-});
-
-app.get("/allpositions", async (req, res) => {
-  let allpositions = await Position.find({});
-  res.json(allpositions);
-});
-
-app.post("/newOrder", async (req, res) => {
-  let newOrder = new Order({
-    name: req.body.name,
-    qty: req.body.qty,
-    price: req.body.price,
-    mode: req.body.mode,
-  });
-  await newOrder.save();
-
-  let newHolding = new Holding({
-    name: req.body.name,
-    qty: req.body.qty,
-    price: req.body.price,
-    avg: req.body.price,
-  });
-  await newHolding.save();
-  res.send("Order sent");
-});
-
-app.post("/newSell", async (req, res) => {
-  let holding = await Holding.findOne({ name: req.body.name });
-  if (req.body.qty <= holding.qty) {
-    let newSell = new Order({
-      name: req.body.name,
-      qty: req.body.qty,
-      price: req.body.price,
-      mode: req.body.mode,
-    });
-    await newSell.save();
-  } else {
-    res.json({ message: "You don't have enough shares to sell" });
-  }
-});
-
-app.get("/orders", async (req, res) => {
-  let allOrders = await Order.find({});
-  res.json(allOrders);
-});
-
-app.listen(PORT, () => {
-  console.log(`App is listening to port: ${PORT}`);
-});
