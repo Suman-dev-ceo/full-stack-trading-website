@@ -19,10 +19,14 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/login", { ...inputValue });
+      const { data } = await axios.post(
+        "/auth/login",
+        { ...inputValue },
+        { withCredentials: true }
+      );
       const { success, message } = data;
       if (success) {
-        handleSuccess(message);
+        handleSuccess(message || "Login successful");
         setTimeout(() => {
           const dashURL =
             process.env.REACT_APP_DASH_URL || "http://localhost:3001";

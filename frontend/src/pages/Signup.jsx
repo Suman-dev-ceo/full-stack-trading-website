@@ -23,10 +23,14 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/signup", { ...inputValue });
+      const { data } = await axios.post(
+        "/auth/signup",
+        { ...inputValue, createdAt: new Date().toISOString() },
+        { withCredentials: true }
+      );
       const { success, message } = data;
       if (success) {
-        handleSuccess(message);
+        handleSuccess(message || "Signup successful");
         setTimeout(() => {
           const dashURL =
             process.env.REACT_APP_DASH_URL || "http://localhost:3001";
