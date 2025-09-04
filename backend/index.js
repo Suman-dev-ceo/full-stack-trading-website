@@ -39,9 +39,53 @@ const corsMiddleware = cors({
 
 // ---- App setup ----
 const app = express();
+
+// --- TEMP DEBUG: log suspicious route paths so we can find the crash ---
+(function debugRoutePaths() {
+  const expressLib = require("express");
+  const appProto = require("express/lib/application");
+  const realRouterFactory = expressLib.Router;
+
+  function logIfBad(where, method, path) {
+    if (typeof path !== "string") return;
+    // absolute URL? e.g. "https://..." — invalid for Express paths
+    if (/^https?:\/\//i.test(path)) {
+      console.error(`🚨 BAD ROUTE (${where}.${method}) Absolute URL:`, path);
+    }
+    // malformed param like "/: " or a colon with no name
+    if (/(^|\/):(\s|$)/.test(path)) {
+      console.error(
+        `🚨 BAD ROUTE (${where}.${method}) Bad param:`,
+        JSON.stringify(path)
+      );
+    }
+  }
+
+  // Patch app-level methods
+  ["use", "get", "post", "put", "delete", "patch", "all"].forEach((m) => {
+    const orig = appProto[m];
+    appProto[m] = function (path, ...rest) {
+      logIfBad("app", m, path);
+      return orig.call(this, path, ...rest);
+    };
+  });
+
+  // Patch router methods
+  expressLib.Router = function (...args) {
+    const r = realRouterFactory.apply(expressLib, args);
+    ["use", "get", "post", "put", "delete", "patch", "all"].forEach((m) => {
+      const orig = r[m];
+      r[m] = function (path, ...rest) {
+        logIfBad("router", m, path);
+        return orig.call(this, path, ...rest);
+      };
+    });
+    return r;
+  };
+})();
+
 app.set("trust proxy", 1); // needed on Render for correct secure cookie behavior
 app.use(corsMiddleware);
-app.options("*", corsMiddleware); // handle preflight
 app.use(cookieParser());
 app.use(bodyParser.json());
 
