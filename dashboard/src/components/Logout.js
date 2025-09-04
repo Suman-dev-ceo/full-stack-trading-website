@@ -1,16 +1,11 @@
-import axios from "../api";
+import { useUser } from "./UserContext";
 
 export default function Logout() {
-  const handleClick = async () => {
-    try {
-      await axios.post("/auth/logout"); // backend should clear cookie
-    } catch {}
-    const authURL = process.env.REACT_APP_AUTH_URL || "http://localhost:3000";
-    window.location.assign(authURL);
-  };
+  const { logout, loading } = useUser();
 
+  if (loading) return null;
   return (
-    <button className="btn btn-primary mx-4" onClick={handleClick}>
+    <button className="btn btn-primary mx-4" onClick={logout}>
       Logout
     </button>
   );
