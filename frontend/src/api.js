@@ -1,8 +1,7 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: "/api", // handled by Netlify _redirects
-  withCredentials: true, // send cookies with requests
-});
+axios.defaults.withCredentials = true; // send cookies with requests
+axios.defaults.baseURL =
+  process.env.REACT_APP_API_URL || "http://localhost:8080";
 
-export default api;
+export default axios;
