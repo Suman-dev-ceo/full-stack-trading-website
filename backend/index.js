@@ -17,6 +17,7 @@ const uri = process.env.MONGO_URL;
 const defaultAllowed = [
   "https://sparkling-rolypoly-0089c9.netlify.app", // Auth app
   "https://full-stack-trading-dashboard.netlify.app", // Dashboard app
+  "https://full-stack-trading-website-frontend-hlfa.onrender.com/",
   "http://localhost:3000",
   "http://localhost:3001",
 ];
