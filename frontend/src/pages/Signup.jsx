@@ -23,17 +23,24 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post(
-        "/auth/signup",
-        { ...inputValue, createdAt: new Date().toISOString() },
-        { withCredentials: true }
-      );
-      const { success, message } = data;
-      if (success) {
+      const { data } = await axios.post("/auth/signup", {
+        ...inputValue,
+        createdAt: new Date().toISOString(),
+      });
+
+      const { success, message, token } = data;
+
+      if (success && token) {
+        // Save token in localStorage
+        localStorage.setItem("token", token);
+
         handleSuccess(message || "Signup successful");
+
+        // Redirect to dashboard app
         setTimeout(() => {
           const dashURL =
-            process.env.REACT_APP_DASH_URL || "http://localhost:3001";
+            process.env.REACT_APP_DASH_URL ||
+            "https://full-stack-trading-dashboard.netlify.app";
           window.location.assign(dashURL);
         }, 800);
       } else {
