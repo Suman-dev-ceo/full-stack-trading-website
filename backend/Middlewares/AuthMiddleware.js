@@ -6,7 +6,7 @@ const SECRET = process.env.JWT_SECRET || process.env.TOKEN_KEY;
 function getTokenFromReq(req) {
   const h = req.headers.authorization || "";
   if (h.startsWith("Bearer ")) return h.slice(7);
-  return req.cookies?.token; // fallback to cookie if present
+  return req.cookies?.token; // fallback
 }
 
 module.exports.userVerification = async (req, res) => {
