@@ -5,6 +5,7 @@ import { GeneralContextProviderSell } from "./GeneralContextSell";
 import Apps from "./Apps";
 import Funds from "./Funds";
 import Holdings from "./Holdings";
+import AuthCallback from "../AuthCallback";
 
 import Orders from "./Orders";
 import Positions from "./Positions";
@@ -27,6 +28,7 @@ const Dashboard = ({ user }) => {
           <Route path="/positions" element={<Positions />} />
           <Route path="/funds" element={<Funds />} />
           <Route path="/apps" element={<Apps />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
         </Routes>
       </div>
     </div>

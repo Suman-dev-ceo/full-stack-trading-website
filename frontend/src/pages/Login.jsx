@@ -34,7 +34,7 @@ const Login = () => {
           const dashURL =
             process.env.REACT_APP_DASH_URL ||
             "https://full-stack-trading-dashboard.netlify.app";
-          window.location.assign(dashURL);
+          window.location.assign(`${dashURL}/auth/callback#token=${encodeURIComponent(token)}`);
         }, 800);
       } else {
         handleError(message || "Invalid credentials");
