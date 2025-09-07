@@ -3,13 +3,18 @@ const User = require("../models/UserModel");
 
 const SECRET = process.env.JWT_SECRET || process.env.TOKEN_KEY;
 
+function getTokenFromReq(req) {
+  const h = req.headers.authorization || "";
+  if (h.startsWith("Bearer ")) return h.slice(7);
+  return req.cookies?.token; // fallback to cookie if present
+}
+
 module.exports.userVerification = async (req, res) => {
   try {
-    const token = req.cookies?.token;
+    const token = getTokenFromReq(req);
     if (!token) return res.json({ status: false });
 
-    const payload = jwt.verify(token, SECRET); // unified secret
-
+    const payload = jwt.verify(token, SECRET);
     if (!payload?.id) return res.json({ status: false });
 
     const user = await User.findById(payload.id).select("_id username email");

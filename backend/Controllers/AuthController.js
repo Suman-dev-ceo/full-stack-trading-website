@@ -1,6 +1,6 @@
 const User = require("../models/UserModel");
 const { createSecretToken } = require("../util/SecretToken");
-const bcrypt = require("bcrypt"); 
+const bcrypt = require("bcrypt");
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -33,6 +33,7 @@ module.exports.Signup = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Signup successful",
+      token,
       user: { id: user._id, email: user.email, username: user.username },
     });
   } catch (err) {
@@ -67,6 +68,7 @@ module.exports.Login = async (req, res) => {
     return res.json({
       success: true,
       message: "Login successful",
+      token,
       user: { id: user._id, email: user.email, username: user.username },
     });
   } catch (err) {
