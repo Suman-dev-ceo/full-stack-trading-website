@@ -1,26 +1,39 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "../api";
 
+// Shape: user = { id, username, email } or null
 const UserCtx = createContext({
   user: null,
   loading: true,
-  setUser: () => {},
-  logout: async () => {},
+  setUser: () => { },
+  logout: async () => { },
 });
 
 export function UserProvider({ children }) {
-  const [user, setUser] = useState(null); // { _id, username, email }
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setUser(null);
+          return;
+        }
+
+        // axios interceptor should already add Authorization header,
+        // but this ensures it even if the interceptor isn't loaded yet.
         const { data } = await axios.get("/auth/verify", {
-          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
         });
-        if (data?.status) setUser(data.user);
-        else setUser(null);
-      } catch {
+
+        if (data?.status && data?.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (_err) {
         setUser(null);
       } finally {
         setLoading(false);
@@ -28,12 +41,16 @@ export function UserProvider({ children }) {
     })();
   }, []);
 
+  // Clear token and bounce to the Auth app
   const logout = async () => {
     try {
-      await axios.post("/auth/logout", {}, { withCredentials: true });
-    } finally {
+      // No need to call backend for cookie clearing 
+      localStorage.removeItem("token");
       setUser(null);
-      const authURL = process.env.REACT_APP_AUTH_URL || "http://localhost:3000";
+    } finally {
+      const authURL =
+        process.env.REACT_APP_AUTH_URL ||
+        "https://sparkling-rolypoly-0089c9.netlify.app/login";
       window.location.assign(authURL);
     }
   };
