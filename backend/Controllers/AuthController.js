@@ -1,6 +1,6 @@
 const User = require("../models/UserModel");
 const { createSecretToken } = require("../util/SecretToken");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt"); 
 
 const isProd = process.env.NODE_ENV === "production";
 
