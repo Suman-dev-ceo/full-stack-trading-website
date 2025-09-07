@@ -18,7 +18,8 @@ module.exports.Signup = async (req, res) => {
   try {
     const { email, password, username, createdAt } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email })
+      .select("+password _id email username");
     if (existingUser) {
       return res
         .status(200)
