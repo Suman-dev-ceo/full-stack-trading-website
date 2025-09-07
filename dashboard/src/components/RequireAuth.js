@@ -6,11 +6,20 @@ export default function RequireAuth({ children }) {
 
   useEffect(() => {
     (async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        redirectToLogin();
+        return;
+      }
       try {
-        // Must match your backend route + method
-        const { data } = await axios.get("/auth/verify");
-        if (data?.status) setOk(true);
-        else redirectToLogin();
+        const { data } = await axios.get("/auth/verify", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (data?.status) {
+          setOk(true);
+        } else {
+          redirectToLogin();
+        }
       } catch {
         redirectToLogin();
       }
@@ -19,10 +28,12 @@ export default function RequireAuth({ children }) {
   }, []);
 
   const redirectToLogin = () => {
-    const authURL = process.env.REACT_APP_AUTH_URL || "http://localhost:3000";
+    const authURL =
+      process.env.REACT_APP_AUTH_URL ||
+      "https://sparkling-rolypoly-0089c9.netlify.app"; // fallback to your auth app
     window.location.assign(`${authURL}/login`);
   };
 
-  if (ok === null) return null; // or a spinner
-  return children;
+  if (ok === null) return null; // or a loading spinner
+  return ok ? children : null;
 }
