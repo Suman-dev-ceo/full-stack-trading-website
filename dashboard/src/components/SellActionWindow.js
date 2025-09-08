@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import "./SellActionWindow.css";
-import axios from "axios";
+import axios from "../api";
 import GeneralContextSell from "./GeneralContextSell";
 
 const SellActionWindow = ({ uid }) => {
@@ -12,7 +12,7 @@ const SellActionWindow = ({ uid }) => {
   const handleSellClick = async () => {
     try {
       await axios
-        .post("http://localhost:8080/newSell", {
+        .post("/newSell", {
           name: uid,
           qty: stockQuantity,
           price: stockPrice,
