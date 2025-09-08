@@ -33,7 +33,7 @@ const Login = () => {
         setTimeout(() => {
           const dashURL =
             process.env.REACT_APP_DASH_URL ||
-            "https://full-stack-trading-dashboard.netlify.app";
+            "https://suman-fullstack-trading-dashboard.netlify.app";
           window.location.assign(`${dashURL}/auth/callback#token=${encodeURIComponent(token)}`);
         }, 800);
       } else {
