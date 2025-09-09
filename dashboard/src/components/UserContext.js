@@ -35,7 +35,7 @@ export function UserProvider({ children }) {
     } finally {
       const authURL =
         process.env.REACT_APP_AUTH_URL ||
-        "https://suman-fullstack-trading.netlify.app";
+        "https://sparkling-rolypoly-0089c9.netlify.app";
       window.location.assign(`${authURL}/login`);
     }
   };

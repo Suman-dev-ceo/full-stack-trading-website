@@ -15,8 +15,8 @@ const uri = process.env.MONGO_URL;
 
 // ---- CORS allowlist ----
 const defaultAllowed = [
-  "https://suman-fullstack-trading.netlify.app",// Auth app
-  "https://suman-fullstack-trading-dashboard.netlify.app", // Dashboard app
+  "https://sparkling-rolypoly-0089c9.netlify.app",// Auth app
+  "https://full-stack-trading-dashboard.netlify.app", // Dashboard app
   "http://localhost:3000",
   "http://localhost:3001",
 ];
