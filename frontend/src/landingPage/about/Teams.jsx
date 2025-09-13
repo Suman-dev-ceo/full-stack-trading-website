@@ -11,12 +11,12 @@ function Teams() {
       >
         <div className="col-6 p-3 text-center">
           <img
-            src="media/images/nithinKamath.jpg"
+            src="media/images/Suman.jpeg"
             alt="Founder Img"
             style={{ borderRadius: "100%", width: "60%" }}
           />
-          <h4 className="mt-3">Nithin Kamath</h4>
-          <h6>Founder, CEO</h6>
+          <h4 className="mt-3">Suman Srinivas</h4>
+          <h6>Web Developer</h6>
         </div>
         <div className="col-6 p-3">
           <p>
